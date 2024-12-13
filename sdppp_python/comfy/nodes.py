@@ -6,20 +6,25 @@ from ..protocols.photoshop import ProtocolPhotoshop
 from PIL import Image, ImageOps, ImageSequence, ImageFile
 
 class SDPPPOptional(dict):
-    def __init__(self, optional_dict):
+    def __init__(self, optional_dict, iter_keys = []):
         super().__init__()
         # self.contains_key_arr = args[0] # list of keys that can be existed in the dict
         self.contains_key_arr = optional_dict.keys()
         self.optional_dict = optional_dict
+        self.iter_keys = iter_keys
 
     def __contains__(self, key):
         return key in self.contains_key_arr
 
     def __getitem__(self, key):
-        
         if key in self.contains_key_arr:
             return self.optional_dict[key]
         return None
+
+    def __iter__(self):
+        return iter(self.iter_keys)
+
+
 
 def check_linked_in_prompt(prompt, unique_id, name):
     node_prompt = prompt[0][unique_id[0]]
@@ -237,7 +242,6 @@ def define_comfyui_nodes(sdpppServer):
                 result['layer_infos']
             )
 
-
     class GetSelectionNode:
         RETURN_TYPES = ("MASK",)
         RETURN_NAMES = ("mask",)
@@ -263,9 +267,9 @@ def define_comfyui_nodes(sdpppServer):
                     "document": ("DOCUMENT", {"default": None, "sdppp_type": "DOCUMENT"}),
                 },
                 "optional": SDPPPOptional({
-                    "bound": ('BOUND', {"default": None}),
                     "sdppp": ("STRING", {"default": ""}),
-                }),
+                    "bound": ('BOUND', {"default": None}),
+                }, ["bound"]),
                 "hidden": {
                     "unique_id": "UNIQUE_ID",
                     "prompt": "PROMPT", 

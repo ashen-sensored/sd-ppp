@@ -119,13 +119,24 @@ def registerSocketEvents(sdppp, sio):
         return result
 
     @sio.event
+    async def b_set_widget_value(sid, payload = {}):
+        if len(sdppp.page_instances) == 0:
+            return {"error": "Please connect at least one page instance"}
+        
+        result = await sdppp.sio.call('b_set_widget_value', payload, to=payload['sid'])
+        return result
+
+    @sio.event
     async def b_flush_data(sid, payload = {}):
-        store = sdppp.backend_instances[sid].store
-        if store.patch_version_acceptable(payload['fromVersion']):
-            store.patch_data(payload['operations'], payload['fromVersion'])
-        else:
-            result = await sio.call('s_request_data', {}, to=sid)
-            sdppp.backend_instances[sid].store.sync_data(result['data'], result['version'])
+        try: 
+            store = sdppp.backend_instances[sid].store
+            if store.patch_version_acceptable(payload['fromVersion']):
+                store.patch_data(payload['operations'], payload['fromVersion'])
+            else:
+                result = await sio.call('s_request_data', {}, to=sid)
+                sdppp.backend_instances[sid].store.sync_data(result['data'], result['version'])
+        except Exception as e:
+            return {"error": str(e)}
 
         payload['sid'] = sid
         if len(sdppp.page_instances):
@@ -133,12 +144,16 @@ def registerSocketEvents(sdppp, sio):
 
     @sio.event
     async def c_flush_data(sid, payload = {}):
-        store = sdppp.page_instances[sid].store
-        if store.patch_version_acceptable(payload['fromVersion']):
-            store.patch_data(payload['operations'], payload['fromVersion'])
-        else:
-            result = await sio.call('s_request_data', {}, to=sid)
-            sdppp.page_instances[sid].store.sync_data(result['data'], result['version'])
+        try:
+            store = sdppp.page_instances[sid].store
+            if store.patch_version_acceptable(payload['fromVersion']):
+                store.patch_data(payload['operations'], payload['fromVersion'])
+            else:
+                result = await sio.call('s_request_data', {}, to=sid)
+                sdppp.page_instances[sid].store.sync_data(result['data'], result['version'])
+        except Exception as e:
+            print('=============error============', e)
+            return {"error": str(e)}
 
         payload['sid'] = sid
         if len(sdppp.backend_instances):
