@@ -1,3 +1,13 @@
+## [1.7.0] - 2024-02-03
+1. feature: support `LoadImage` and `LoadImage as Mask` node in comfy
+2. feature: support selected layer in layer selection
+3. feature: add sd-ppp setting panel in comfy, which allows you to set the maximum image size
+4. feature: you can now customize how the widget display in PS
+5. feature: support get layer name in `ParseLayerInfo` node
+6. feature: add expand button for example psd in workflow running panel
+7. optimize: show workflow title in workflow running panel
+
+
 ## [1.6.2] - 2024-01-10
 1. optimize: the name of the new layer will now have an auto-incremented id.
 2. optimize: list page style optimization.
