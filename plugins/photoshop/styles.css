@@ -155,7 +155,9 @@ sp-label.error-label {
     flex-direction: column;
     margin-bottom: 10px;
 }
-
+.workflow-edit-field-title {
+    color: var(--uxp-host-text-color);
+}
 .workflow-edit-field-widgets {
     display: flex;
     flex-direction: row;

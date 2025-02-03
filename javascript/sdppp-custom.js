@@ -13,13 +13,14 @@
  * PS_LAYER: Photoshop 图层
  * 
  * 
- * tips: How to control the space of widgets and line breaks
+ * !!!tips!!!
+ * How to control the space of widgets and line breaks?
  * Each line can contain 12 uiWeight widgets, if it exceeds, it will break the line
  * For example, if there are two widgets with uiWeight of 8 and 4, they will occupy one line, occupying two-thirds and one-third of the space respectively
  * If there are three widgets with uiWeight of 4, 4, and 4, they will share the space of one line equally
  * The default uiWeight of each widget is 12, which means they will occupy one line by default
- * 
- * tips: 如何控制控件的占用空间、换行
+ * !!!tips!!!
+ * 如何控制控件的占用空间、换行?
  * 每一行，能容纳下uiWeight总和为12的控件，如果超了就会换行
  * 比如PrimitiveNumber有两个控件，uiWeight分别为8和4，那么这两个控件就会占用一行，分别占用三分之二和三分之一的空间
  * 如果有三个控件，uiWeight分别为4、4、4，那么它们就会等分一行的空间
@@ -32,15 +33,18 @@ export default function(sdppp) {
      * Handle SDPPP Get Document
      * 处理 SDPPP Get Document
      * 
-     * only keep the first widget, set the output type to DOCUMENT
-     * 只保留第一个控件, 将输出类型设置为 DOCUMENT
+     * only keep the first widget, set the output type to PS_DOCUMENT
+     * 只保留第一个控件, 将输出类型设置为 PS_DOCUMENT
      */
     sdppp.widgetable.add('SDPPP Get Document', (node) => {
         return {
             title: node.title,
             widgets: [{
                 value: node.widgets[0].value,
-                outputType: "PS_DOCUMENT"
+                outputType: "PS_DOCUMENT",
+                options: {
+                    values: node.widgets[0].options.values()
+                }
             }]
         }
     })
@@ -48,17 +52,17 @@ export default function(sdppp) {
      * Handle SDPPP Get Layer By ID
      * 处理 SDPPP Get Layer By ID
      * 
-     * only keep the first widget, set the output type to LAYER
-     * 只保留第一个控件, 将输出类型设置为 LAYER
+     * only keep the first widget, set the output type to PS_LAYER
+     * 只保留第一个控件, 将输出类型设置为 PS_LAYER
      */
     sdppp.widgetable.add('SDPPP Get Layer By ID', (node) => {
-
         return {
             title: node.title,
             widgets: [{
                 value: node.widgets[0].value,
                 outputType: "PS_LAYER",
                 options: {
+                    values: node.widgets[0].options.values,
                     documentNodeID: sdppp.findDocumentNodeRecursive(node)?.id || 0
                 }
             }]
@@ -78,7 +82,7 @@ export default function(sdppp) {
      * 如果第一个控件是数字类型且适用拖动控件，则只保留第一个控件
      */
     sdppp.widgetable.add('PrimitiveNode', (node) => {
-        let title = node.title.startsWith("Primitive") ? nameByTitleOrConnectedOutput(node) : node.title;
+        let title = node.title.startsWith("Primitive") ? nameByConnectedOutputOrTitle(node) : node.title;
         if (!node.widgets || node.widgets.length == 0) {
             return null;
         }
@@ -88,7 +92,7 @@ export default function(sdppp) {
                 name: widget.label || widget.name,
                 outputType: widget.type || "string",
                 options: widget.options,
-                uiWeight: index == 0 ? 2 : 0.8
+                uiWeight: index == 0 ? 8 : 4
             }))
         if (widgets[0].outputType == "number") {
             let isStepRangeTooBig = ((widgets[0].options.max - widgets[0].options.min) / widgets[0].options.step) > 1000;
@@ -157,6 +161,6 @@ export default function(sdppp) {
  * @param {*} node 
  * @returns 
  */
-function nameByTitleOrConnectedOutput(node) {
+function nameByConnectedOutputOrTitle(node) {
     return node.outputs?.[0].widget?.name || node.title;
 }
